@@ -2,13 +2,13 @@
 
     require_once 'common-top.php';
 
-    echo '<h2>Data Converters</h2>';
+    echo '<h2>Data Modifiers</h2>';
 
     echo '<div class="card-list">';
 
     // Let's get all of the tables...
     $sql = 'SELECT code, name, description, type
-            FROM converters
+            FROM modifiers
             ORDER BY name ASC';
 
     $convs = getRecords( $sql );

@@ -6,24 +6,37 @@ Generate fake data sets, downloadable as CSV files. Has a NZ bias as that's wher
 - Forenames (M/F)
 - Surnames
 - Addresses
-- Creatures
-- Pokemon
+- Countries with stats
+- Creatures by category
+- Employers (NZ)
+- Jobs
+- Pokemon with info
+- Colours by scheme (RGB and Hex)
 - Weekdays
 - Months
 - etc.
 
 ## Generators
 - Int
+- Decimal with fixed DP
 - Binary int
 - Hex int
-- Username
+- Boolean with odds
+- Constant
+- Counter with step
+- Normal distribution across range
+- ASCII chars
+- Username (based on names)
 - Password
+- Email (based on names)
+- Mobile phone
 - Sentences
 - Words
-- Date
-- Time
-- IPv4
-- etc.
+- Text based on format string
+- Pick(s) from a list
+- Date with format
+- Time with format
+- IPv4 address
 
 ## Modifiers
 - To uppercase

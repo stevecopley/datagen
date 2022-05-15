@@ -19,6 +19,8 @@
 
     <link rel="stylesheet" href="css/reset.css">
     <link rel="stylesheet" href="css/styles.css">
+
+    <script src="scripts/request.js"></script>
 </head>
 
 <body>
@@ -41,7 +43,7 @@
 
                 <li><a href="list-tables.php">Tables</a></li>
                 <li><a href="list-generators.php">Generators</a></li>
-                <li><a href="list-converters.php">Converters</a></li>
+                <li><a href="list-modifiers.php">Modifiers</a></li>
                 <li><a href="form-new-query.php">Create Query</a></li>
                 <li><a href="show-query.php">Show Query</a></li>
             </ul>

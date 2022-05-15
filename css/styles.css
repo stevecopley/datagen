@@ -10,7 +10,7 @@
     --back-main:  #263238;
     --back-head:  #455a64;
     --back-card:  #fff;
-    --back-alt:   #eceff1;
+    --back-alt:   #eceff180;
     --back-panel: #111;
 
     --text-high: #111;
@@ -265,7 +265,7 @@ main>p {
 
 .card-list .card.fixed {
     width: 100%;
-    max-width: 20rem;
+    max-width: 22rem;
 }
 
 .card-list .card.narrow {
@@ -322,20 +322,6 @@ main>p {
 }
 
 
-.card label {
-    display: block;
-    font-size: 0.8rem;
-    color: var(--text-low);
-    margin-bottom: 0.1rem;
-}
-
-.card label:not(:first-of-type) {
-    margin-top: 0.5rem;
-}
-
-.card.admin {
-    background: var(--back-alt);
-}
 
 
 /*** LISTS *******************************************************/
@@ -461,13 +447,37 @@ th:first-of-type {
 form {
     margin: 0 auto;
     width: 100%;
-    max-width: 30rem
+    /* max-width: 30rem; */
 }
 
-form.card label {
-    font-size: 1rem;
-    margin-bottom: 0.3rem;
+form .group {
+    padding: 0.5rem;
+    border: 1px solid var(--contrast);
+    border-radius: 0.25rem;
+    background-color: var(--back-alt);
+    display: flex;
+    gap: 0.5rem;
+    align-items: center;
+    flex-wrap: wrap;
 }
+
+form .group :is(p, label, input, select) {
+    margin: 0;
+}
+
+form .group input[type=radio]:not(:checked) ~ :is(input, select) {
+    opacity: 0.25;
+    pointer-events: none;
+}
+
+
+form label {
+    display: block;
+    font-size: 0.8rem;
+    color: var(--text-low);
+    margin-bottom: 0.1rem;
+}
+
 
 input,
 textarea {
@@ -484,6 +494,7 @@ textarea {
 input[type=number],
 input[type=date],
 input[type=checkbox],
+input[type=radio],
 input[type=submit] {
     width: auto;
 }
@@ -504,7 +515,7 @@ input[type=submit] {
 }
 
 input[type=submit]:hover {
-    background: var(--contrast);
+    background: var(--text-inv);
     color: var(--text-high);
     cursor: pointer;
 }

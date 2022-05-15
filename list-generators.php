@@ -17,8 +17,8 @@
         $n = null;
         $min = null;
         $max = null;
-        $data = null;
-        $rates = null;
+        $format = null;
+        $info = null;
 
         // Generate appropriate example data
         switch( $gen['code'] ) {
@@ -28,7 +28,7 @@
                 break;
 
             case 'CONS':
-                $data = 'Pow!';
+                $format = 'Pow!';
                 break;
 
             case 'INT':
@@ -66,27 +66,30 @@
                 break;
 
             case 'BOOL':
-                $data = 'Left | Right';
-                $rates = '50 | 50';
+                $format = 'Left | Right';
+                $info = '50 | 50';
                 break;
 
             case 'LIST':
-                $data = '#important | #today | #call';
-                $rates = '30 | 40 | 30';
+                $format = '#important | #today | #call';
+                $info = '30 | 40 | 30';
                 $min = 0;
                 $max = 3;
                 break;
 
             case 'EMAIL':
-                $data = '(No names given)';
+                $format = '{FORENAME}@{DOMAIN}';
+                $info = ',tigerbalm.com';
                 break;
 
             case 'USER':
-                $data = '(No names given)';
+                $format = null;
+                $info = 'Bob,Smith';
                 break;
 
             case 'PASS':
-                $n = 8;
+                $min = 8;
+                $max = 12;
                 break;
 
             case 'TEL':
@@ -95,19 +98,19 @@
             case 'DATE':
                 $min = 2000;
                 $max = 2021;
-                $data = 'd/m/Y';
+                $format = 'd/m/Y';
                 break;
 
             case 'TIME':
                 $min = 8;
                 $max = 17;
-                $data = 'g:i a';
+                $format = 'g:i a';
 
             case 'IPV4':
                 break;
 
             case 'CODE':
-                $data = 'AA000 >>> [aaa]';
+                $format = 'AA000 >>> [aaa]';
                 break;
 
             case 'TEXT':
@@ -138,11 +141,11 @@
         echo     '<h3>Example</h3>';
         echo     '<ul>';
 
-        if( $n     !== null ) echo '<li>N: <em>'.$n.'</em>';
-        if( $min   !== null ) echo '<li>MIN: <em>'.$min.'</em>';
-        if( $max   !== null ) echo '<li>MAX: <em>'.$max.'</em>';
-        if( $data  !== null ) echo '<li>DATA: <em>'.$data.'</em>';
-        if( $rates !== null ) echo '<li>RATES: <em>'.$rates.'</em>';
+        if( $n      !== null ) echo '<li>N: <em>'.$n.'</em>';
+        if( $min    !== null ) echo '<li>MIN: <em>'.$min.'</em>';
+        if( $max    !== null ) echo '<li>MAX: <em>'.$max.'</em>';
+        if( $format !== null ) echo '<li>FORMAT: <em>'.$format.'</em>';
+        if( $info   !== null ) echo '<li>INFO: <em>'.$info.'</em>';
         
         echo     '</ul>';
         echo   '</section>';
@@ -159,22 +162,18 @@
         echo         '</thead>';
         echo         '<tbody>';
 
+        // Reset counter if needed
         if( $gen['code'] == 'AUTO' ) resetCounter( $min, $n );
+        // Save name fields for email / username
+        if( $gen['code'] == 'USER' || $gen['code'] == 'EMAIL' ) mapFields( $format, $info );
 
         for( $i = 1; $i <= 5; $i++ ) {
-            $dataValue = generate( $gen['code'], $n, $min, $max, $data, $rates );
-
-            // Some fields need post-processing
-            if( $gen['code'] == 'EMAIL' ) {
-                $dataValue = generateEmail();
-            }
-            if( $gen['code'] == 'USER' ) {
-                $dataValue = generateUser();
-            }
+            $formatValue = generate( $gen['code'], $n, $min, $max, $format, $info );
+            processField( $formatValue );
 
             echo '<tr>';
             echo   '<th>'.$i.'</th>';
-            echo   '<td>'.$dataValue.'</td>';
+            echo   '<td>'.$formatValue.'</td>';
             echo '</tr>';
         } 
 
@@ -183,6 +182,8 @@
         echo     '</div>';
         echo   '</section>';
         echo '</div>';
+
+        // if( $gen['code'] == 'EMAIL' ) break;
     }
 
     echo  '</div>';

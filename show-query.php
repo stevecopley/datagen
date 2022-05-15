@@ -41,20 +41,19 @@
                    criteria.gen_min,
                    criteria.gen_max,
                    criteria.gen_n,
-                   criteria.gen_data,
-                   criteria.gen_rates,
+                   criteria.gen_format,
+                   criteria.gen_info,
 
                    generators.name        AS gname,
                    generators.type,
                    generators.description AS gdesc,
-                   generators.post_process,
                    
-                   criteria.conv_code,
-                   criteria.conv_n,
-                   criteria.conv_data,
+                   criteria.mod_code,
+                   criteria.mod_n,
+                   criteria.mod_data,
 
-                   converters.name        AS cname,
-                   converters.description AS cdesc
+                   modifiers.name        AS mname,
+                   modifiers.description AS mdesc
                    
 
             FROM queries
@@ -66,7 +65,7 @@
             
             LEFT JOIN generators ON criteria.gen_code    = generators.code
             
-            LEFT JOIN converters ON criteria.conv_code   = converters.code
+            LEFT JOIN modifiers  ON criteria.mod_code    = modifiers.code
             
             WHERE queries.id = ?
             
@@ -95,7 +94,7 @@
 
     echo     '<ul>';
 
-    // Show the query criteria details
+    // Show the query criteria details **********************************************************
 
     $forenameColumn = null;
     $surnameColumn = null;
@@ -109,11 +108,12 @@
             // If a filetr is in use, show that too
             if( $criterion['fname'] != 'All' ) echo '(<strong>'.$criterion['fname'].'</strong>)';
 
-            // Are we using a converter
-            if( $criterion['conv_code'] ) {
-                $desc = $criterion['cdesc'];
-                if( $criterion['conv_n'] ) $desc = str_replace( '{N}', '<strong>'.$criterion['conv_n'].'</strong>', $desc );
-                echo ' &xrarr; <strong>'.$desc.'</strong> ';
+            // Are we using a modifier
+            if( $criterion['mod_code'] ) {
+                $desc = '<strong>'.$criterion['mname'].'</strong> '.$criterion['mdesc'];
+                $desc = str_replace( '{N}',    ($criterion['mod_n']    === null) ? 'none' : '<strong>'.$criterion['mod_n']   .'</strong>', $desc );
+                $desc = str_replace( '{DATA}', ($criterion['mod_data'] === null) ? 'none' : '<strong>'.$criterion['mod_data'].'</strong>', $desc );
+                echo ' &xrarr; '.$desc;
             }
 
             // What fields are we using?
@@ -136,21 +136,21 @@
 
             if( $criterion['gdesc'] ) {
                 $desc = $criterion['gdesc'];
-                if( $criterion['gen_min']   !== null ) $desc = str_replace( '{MIN}',    '<strong>'.$criterion['gen_min']   .'</strong>', $desc );
-                if( $criterion['gen_max']   !== null ) $desc = str_replace( '{MAX}',    '<strong>'.$criterion['gen_max']   .'</strong>', $desc );
-                if( $criterion['gen_n']     !== null ) $desc = str_replace( '{N}',      '<strong>'.$criterion['gen_n']     .'</strong>', $desc );
-                if( $criterion['gen_data']  !== null ) $desc = str_replace( '{DATA}',   '<strong>'.$criterion['gen_data']  .'</strong>', $desc );
-                if( $criterion['gen_rates'] !== null ) $desc = str_replace( '{RATES}',  '<strong>'.$criterion['gen_rates'] .'</strong>', $desc );
+                $desc = str_replace( '{MIN}',    ($criterion['gen_min']    === null) ? 'none' : '<strong>'.$criterion['gen_min']    .'</strong>', $desc );
+                $desc = str_replace( '{MAX}',    ($criterion['gen_max']    === null) ? 'none' : '<strong>'.$criterion['gen_max']    .'</strong>', $desc );
+                $desc = str_replace( '{N}',      ($criterion['gen_n']      === null) ? 'none' : '<strong>'.$criterion['gen_n']      .'</strong>', $desc );
+                $desc = str_replace( '{FORMAT}', ($criterion['gen_format'] === null) ? 'none' : '<strong>'.$criterion['gen_format'] .'</strong>', $desc );
+                $desc = str_replace( '{INFO}',   ($criterion['gen_info']   === null) ? 'none' : '<strong>'.$criterion['gen_info']   .'</strong>', $desc );
 
                 echo '('.$desc.')';
             }
 
-            // Are we using a converter
-            if( $criterion['conv_code'] ) {
-                $desc = $criterion['cdesc'];
-                if( $criterion['conv_n']    !== null ) $desc = str_replace( '{N}',    '<strong>'.$criterion['conv_n']   .'</strong>', $desc );
-                if( $criterion['conv_data'] !== null ) $desc = str_replace( '{DATA}', '<strong>'.$criterion['conv_data'].'</strong>', $desc );
-                echo ' &xrarr; <strong>'.$desc.'</strong> ';
+            // Are we using a modifier
+            if( $criterion['mod_code'] ) {
+                $desc = '<strong>'.$criterion['mname'].'</strong> '.$criterion['mdesc'];
+                $desc = str_replace( '{N}',    ($criterion['mod_n']    === null) ? 'none' : '<strong>'.$criterion['mod_n']   .'</strong>', $desc );
+                $desc = str_replace( '{DATA}', ($criterion['mod_data'] === null) ? 'none' : '<strong>'.$criterion['mod_data'].'</strong>', $desc );
+                echo ' &xrarr; '.$desc;
             }
 
             echo ' &xrarr; value as <em>\''.$criterion['headings'].'\'</em>';
@@ -161,7 +161,7 @@
     echo   '</section>';
     
 
-    // Generate the data!
+    // Generate the data! *********************************************************************
 
     $data = [];
     $keys = [];
@@ -202,13 +202,15 @@
 
                 // Append data to the row
                 foreach( $results[$i] as $dataValue ) {
-                    // Are we using a converter?
-                    if( $criterion['conv_code'] ) {
-                        $dataValue = convert( $dataValue, 
-                                              $criterion['conv_code'], 
-                                              $criterion['conv_n'],
-                                              $criterion['conv_data'] );
+                    // Are we using a modifier?
+                    if( $criterion['mod_code'] ) {
+                        modifyData( $dataValue, 
+                                    $criterion['mod_code'], 
+                                    $criterion['mod_n'],
+                                    $criterion['mod_data'] );
                     }
+
+                    // Append data to the row
                     $data[$i][] = $dataValue;
                 }
             }
@@ -218,6 +220,10 @@
         else if( $criterion['gen_code'] ) {
             // Reset counter if needed
             if( $criterion['gen_code'] == 'AUTO' ) resetCounter( $criterion['gen_min'], $criterion['gen_n'] );
+            // Save name fields for email / username
+            if( $criterion['gen_code'] == 'USER' || 
+                $criterion['gen_code'] == 'EMAIL' ) mapFields( $criterion['gen_format'],
+                                                               $criterion['gen_info'] );
 
             // Add to the key collection
             $keys = [...$keys, $criterion['headings']];
@@ -231,14 +237,14 @@
                 $dataValue = generate( $criterion['gen_code'],
                                        $criterion['gen_n'], 
                                        $criterion['gen_min'], $criterion['gen_max'],
-                                       $criterion['gen_data'], $criterion['gen_rates'] );
+                                       $criterion['gen_format'], $criterion['gen_info'] );
 
-                // Are we using a converter?
-                if( $criterion['conv_code'] ) {
-                    $dataValue = convert( $dataValue, 
-                                          $criterion['conv_code'], 
-                                          $criterion['conv_n'],
-                                          $criterion['conv_data'] );
+                // Are we using a modifier?
+                if( $criterion['mod_code'] ) {
+                    modifyData( $dataValue, 
+                                $criterion['mod_code'], 
+                                $criterion['mod_n'],
+                                $criterion['mod_data'] );
                 }
 
                 // Append data to the row
@@ -247,12 +253,13 @@
         }
     }
 
-    for( $i = 0; $i < count( $data ); $i++ ) {
-        $found;
-    }
 
-    // TODO: Implement post-gen email and username processing
+    // Post-process email and username placeholders ********************************************************
+    
+    postProcessData( $keys, $data );
 
+
+    // Show Results ***************************************************************************************
 
     echo   '<section>';
     echo     '<h3>Results (Table)</h3>';
@@ -302,9 +309,9 @@
             if( $i > 0 ) echo '<span class="comma">,</span>';
             echo '<span class="value col'.($i+1).'">';
             // Check if data contains a comman, and wrap it with speech marks if so
-            if( strpos( $row[$i], ',' ) ) echo '"';
+            if( strpos( $row[$i], ',' ) !== false ) echo '"';
             echo $row[$i];
-            if( strpos( $row[$i], ',' ) ) echo '"';
+            if( strpos( $row[$i], ',' ) !== false ) echo '"';
             echo '</span>';
         }
         echo PHP_EOL;

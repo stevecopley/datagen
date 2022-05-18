@@ -1,28 +1,27 @@
-function getFilters( source ) {
+async function getFilters( source ) {
     const tableCode = source.value;
-
-    console.log( tableCode );
-
     console.log( 'Requesting filers for table:' + tableCode );
 
-    // Setup an HTTP request
-    const request = new XMLHttpRequest();
+    const response = await fetch( 'get-filters.php?table=' + tableCode );
+    const filters = await response.json();
 
-    // Add the id to the request URL
-    const url = 'get-filters.php?code=' + tableCode;
+    return filters;
+}
 
-    // Send the request to the server
-    request.open( 'GET', url );
-    request.send();
 
-    // Function to run when we get back a response
-    request.onreadystatechange = () => {
-        // Is it a positive response?
-        if( request.readyState == 4 && request.status == 200 ) {
-            // Yes, so process the JSON data received
-            const filterJSON = request.responseText;
-            console.log( 'Response received: ' + filterJSON );
-            const filterInfo = JSON.parse( filterJSON );
+
+async function updateFilters( source ) {
+    const filters = await getFilters( source );
+
+    const filterList = document.getElementById( 'filter-list' );
+    filterList.innerHTML = '';
+
+    filters.forEach( filter => {
+        const option = document.createElement( 'option' );
+        option.innerHTML = filter.name;
+        option.value = filter.code;
+        filterList.appendChild( option );
+    } );
 
             // TODO: update other select based on response
 
@@ -44,7 +43,5 @@ function getFilters( source ) {
             // detailsDiv.appendChild( name );
             // detailsDiv.appendChild( species );
             // detailsDiv.appendChild( description );
-        }
-    };
 }
 

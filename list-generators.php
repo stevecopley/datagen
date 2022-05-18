@@ -7,9 +7,9 @@
     echo '<div class="card-list">';
 
     // Let's get all of the tables...
-    $sql = 'SELECT code, name, description, type
+    $sql = 'SELECT code, name, description, type, category
             FROM generators
-            ORDER BY name ASC';
+            ORDER BY category ASC, name ASC';
 
     $gens = getRecords( $sql );
 
@@ -127,7 +127,7 @@
         echo '<div class="card fixed">';
 
         echo   '<header>';
-        echo     '<h2>'.$gen['name'].'</h2>';
+        echo     '<h2>'.$gen['name'].' <em>('.$gen['category'].')</em></h2>';
         echo     '<p>'.$gen['type'].' data</p>';
         echo   '</header>';
 

@@ -2,9 +2,9 @@
 
     require_once 'common-top.php';
 
-    $tables     = getRecords( 'SELECT * FROM tables     ORDER BY name' );
-    $filters    = getRecords( 'SELECT * FROM filters    ORDER BY code' );
-    $generators = getRecords( 'SELECT * FROM generators ORDER BY name' );
+    $tables     = getRecords( 'SELECT * FROM tables     ORDER BY category, name' );
+    // $filters    = getRecords( 'SELECT * FROM filters    ORDER BY code' );
+    $generators = getRecords( 'SELECT * FROM generators ORDER BY category, name' );
     $modifiers  = getRecords( 'SELECT * FROM modifiers  ORDER BY name' );
 
 ?>
@@ -20,60 +20,74 @@
             </header>
 
             <section>
-                <h3>Query Details</h2>
+                <h3>Data Sources</h2>
 
                 <form id="query">
 
                     <div id="source" class="group">
 
-                        <div id="tables" class="group">
+                        <fieldset id="tables">
 
-                            <input type="radio" name="sourcepick" checked>
+                            <legend>Tables</legend>
 
-                            <label>Table</label>
-                            <select onchange="getFilters( this );">
+                            <input type="radio" name="sourcepick" value="table" checked>
+
+                            <label>
+                                Table
+                                <select id="table-list" onchange="updateFilters( this );">
+                                    <option value="null">Pick one...</option>
 <?php
     foreach( $tables as $table ) {
         echo '<option value="'.$table['code'].'">'.$table['name'].'</option>';
     }
 ?>
-                            </select>
+                                </select>
+                            </label>
 
-                            <label>Filter</label>
-                            <select>
-<?php
-    foreach( $filters as $filter ) {
-        echo '<option value="'.$filter['code'].'">'.$filter['name'].'</option>';
-    }
-?>
-                            </select>
+                            <label>
+                                Filter
+                                <select id="filter-list" name="filter">
+                                    <option value="null"></option>
+                                </select>
+                            </label>
 
-                        </div>
+                        </fieldset>
                     
                         <p>OR</p>
 
-                        <div id="generators" class="group">
+                        <fieldset id="generators">
 
-                            <input type="radio" name="sourcepick">
+                            <legend>Generators</legend>
+    
+                            <input type="radio" name="sourcepick" value="generator">
 
-                            <label>Generator</label>
-                            <select>
+                            <label>
+                                Generator
+                                <select id="gen_list" name="gen">
+                                    <option value="null">Pick one...</option>
 <?php
     foreach( $generators as $generator ) {
         echo '<option value="'.$generator['code'].'">'.$generator['name'].'</option>';
     }
 ?>
-                            </select>
+                                </select>
+                            </label>
 
-                        </div>
+                            <label>N      <input id="gen-n"      name="genn"    type="number"></label>
+                            <label>MIN    <input id="gen-min"    name="genmin"  type="number"></label>
+                            <label>MAX    <input id="gen-max"    name="genmax"  type="number"></label>
+                            <label>FORMAT <input id="gen-format" name="genform" type="text"></label>
+                            <label>INFO   <input id="gen-info"   name="geninfo" type="text"></label>
+                            
+                        </fieldset>
 
                         <input type="submit" value="Add">
 
                     </div>
 
-                    </form>
-                
-                </section>
+                </form>
+            
+            </section>
 
             <section>
                 <h3>Sample Data Generated</h2>

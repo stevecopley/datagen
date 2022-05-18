@@ -7,9 +7,9 @@
     echo '<div class="card-list">';
 
     // Let's get all of the tables...
-    $sql = 'SELECT code, name, table_name, description
+    $sql = 'SELECT code, name, category, table_name, description
             FROM tables
-            ORDER BY name ASC';
+            ORDER BY category ASC, name ASC';
 
     $tables = getRecords( $sql );
 
@@ -17,7 +17,7 @@
         echo '<div class="card">';
 
         echo   '<header>';
-        echo     '<h2>'.$table['name'].'</h2>';
+        echo     '<h2>'.$table['name'].' <em>('.$table['category'].')</em></h2>';
         echo     '<p>'.$table['description'].'</p>';
         echo   '</header>';
 
@@ -33,11 +33,11 @@
         $filters = getRecords( $sql, 's', [$table['code']] );
 
         if( count( $filters ) <= 1 ) {
-            echo '<li><em>None</em></li>';
+            echo '<li>None</li>';
         }
         else {
             foreach( $filters as $filter ) {
-                if( $filter['name'] != 'All' ) echo '<li>'.$filter['name'].'</li>';
+                if( $filter['name'] != 'All' ) echo '<li><em>'.$filter['name'].'</em></li>';
             }
         }
 
